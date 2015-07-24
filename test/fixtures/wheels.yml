@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  instagram_username: MyString
+  make: MyString
+  model: MyString
+  diameter: MyString
+  front_width_offset: MyString
+  rear_width_offset: MyString
+  pcd_lug_pattern: MyString
+  price: MyString
+  notes: MyText
+
+two:
+  instagram_username: MyString
+  make: MyString
+  model: MyString
+  diameter: MyString
+  front_width_offset: MyString
+  rear_width_offset: MyString
+  pcd_lug_pattern: MyString
+  price: MyString
+  notes: MyText
