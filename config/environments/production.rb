@@ -78,9 +78,9 @@ Rails.application.configure do
     config.paperclip_defaults = {
     :storage => :s3,
     :s3_credentials => {
-      :bucket => ENV['sellin-wheels'],
-      :access_key_id => ENV['AKIAI6BBBNJD4B7B7CVQ'],
-      :secret_access_key => ENV['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']
+      :bucket => ENV['BUCKET-NAME'],
+      :access_key_id => ENV['AWS-ACCESS-KEY-ID'],
+      :secret_access_key => ENV['AWS-SECRET-KEY-ID']
     }
   }
 end

@@ -39,15 +39,9 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_options = {from: 'no-reply@example.com'}
+  config.action_mailer.default_url_options = {:host => 'localhost:3000'}
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
-  config.paperclip_defaults = {
-    :storage => :s3,
-    :s3_credentials => {
-      :bucket => 'sellin-wheels',
-      :access_key_id => 'AKIAI6BBBNJD4B7B7CVQ',
-      :secret_access_key => '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'
-    }
-  }
+
 end
