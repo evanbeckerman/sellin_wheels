@@ -13,6 +13,10 @@ class WheelsController < ApplicationController
     end
   end
 
+  def show
+    @wheel = Wheel.find(params[:id])
+  end
+
   def index
   end
 

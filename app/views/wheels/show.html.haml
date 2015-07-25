@@ -1,0 +1,62 @@
+%div.container
+  %div.row
+    %div.col-xs-12.text-center
+      = image_tag("logo.jpg")
+  %div.row
+    %div.col-xs-8.col-xs-offset-2
+      .panel.panel-default
+        .panel-heading.text-center
+          %h3.panel-title #{@wheel.instagram_username} Submission
+        .panel-body
+          %div.row
+            %div.col.xs-12.text-center
+              = image_tag @wheel.image.url(:medium, timestamp:false) 
+          %div.row
+            %div.col-xs-12.col-xs-offset-1.bold
+              FOR SALE BY:
+              %br
+              #{@wheel.instagram_username}
+              %br
+              🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹
+              %br
+              MAKE: #{@wheel.make}
+              %br
+              MODEL: #{@wheel.model}
+              %br
+              DIAMETER: #{@wheel.diameter}"
+              %br
+              F: WIDTH (OFFSET): #{@wheel.front_width_offset}(")
+              %br
+              R: WIDTH (OFFSET): #{@wheel.rear_width_offset} (")
+              %br
+              PCD / LUG PATTERN: #{@wheel.pcd_lug_pattern}
+              %br
+              🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹
+              %br
+              PRICE: $ #{@wheel.price}
+              %br
+              NOTES/COMMENTS: #{@wheel.notes}
+              %br
+              🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹
+              %br
+              = "#sellinwheels"
+              %br
+              = "#wheelsforsale"
+              %br
+              = "#realwheels"
+              %br
+              = "#fitted"
+              %br
+              = "#fitment"
+              %br
+              = "#flush"
+              %br
+              = "#forged"
+              %br
+              = "#wheels"
+              %br
+              = "#cars"
+              %br
+              = "#go"
+
+
