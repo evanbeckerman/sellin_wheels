@@ -4,50 +4,50 @@
       - @wheel.errors.full_messages.each do |msg|
         %li= msg
   %div.row
-    %div.col-xs-3.col-xs-offset-3
+    %div.col-xs-12.text-center
       = image_tag("logo.jpg")
   %div.row
-    %div.col.xs-3.col-xs-offset-3
+    %div.col.xs-3.text-center
       = form_for(@wheel, multipart: true, :html => {:class => "form-horizontal"}) do |f|
         %div.form-group
           = f.label :instagram_username, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :instagram_username, class: 'form-control'
         %div.form-group
           = f.label :make, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :make, class: 'form-control'
         %div.form-group
           = f.label :model, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :model, class: 'form-control'
         %div.form-group
           = f.label :diameter, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :diameter, class: 'form-control'
         %div.form-group
           = f.label :front_width_offset, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :front_width_offset, class: 'form-control'
         %div.form-group
           = f.label :rear_width_offset, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :rear_width_offset, class: 'form-control'
         %div.form-group
           = f.label :pcd_lug_pattern, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :pcd_lug_pattern, class: 'form-control'
         %div.form-group
           = f.label :price, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_field :price, class: 'form-control'
         %div.form-group
           = f.label :notes, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             = f.text_area :notes, class: 'form-control'
         %div.form-group
           = f.label :image, class: "col-xs-3 control-label"
-          %div.col-xs-3
+          %div.col-xs-6
             %p
               = f.file_field :image
         %div.form-group
