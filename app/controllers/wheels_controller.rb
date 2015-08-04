@@ -7,7 +7,7 @@ class WheelsController < ApplicationController
   def create
     @wheel = Wheel.new(wheel_params)
     if @wheel.save
-      NotificationMailer.notification(@wheel)
+      NotificationMailer.notification(@wheel).deliver
       redirect_to new_wheel_path, notice: "THANKS N STUFF"
     else
       render action: 'new'
