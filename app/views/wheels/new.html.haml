@@ -26,13 +26,21 @@
           %div.col-xs-6
             = f.text_field :diameter, class: 'form-control'
         %div.form-group
-          = f.label :front_width_offset, class: "col-xs-3 control-label"
+          = f.label :front_width, class: "col-xs-3 control-label"
           %div.col-xs-6
-            = f.text_field :front_width_offset, class: 'form-control'
+            = f.text_field :front_width, class: 'form-control'
         %div.form-group
-          = f.label :rear_width_offset, class: "col-xs-3 control-label"
+          = f.label :front_offset, class: "col-xs-3 control-label"
           %div.col-xs-6
-            = f.text_field :rear_width_offset, class: 'form-control'
+            = f.text_field :front_offset, class: 'form-control'
+        %div.form-group
+          = f.label :rear_width, class: "col-xs-3 control-label"
+          %div.col-xs-6
+            = f.text_field :rear_width, class: 'form-control'
+        %div.form-group
+          = f.label :rear_offset, class: "col-xs-3 control-label"
+          %div.col-xs-6
+            = f.text_field :rear_offset, class: 'form-control'
         %div.form-group
           = f.label :pcd_lug_pattern, class: "col-xs-3 control-label"
           %div.col-xs-6
@@ -42,7 +50,7 @@
           %div.col-xs-6
             = f.text_field :price, class: 'form-control'
         %div.form-group
-          = f.label :notes, class: "col-xs-3 control-label"
+          = f.label "notes/hashtags", class: "col-xs-3 control-label"
           %div.col-xs-6
             = f.text_area :notes, class: 'form-control'
         %div.form-group

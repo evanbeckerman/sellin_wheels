@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150724002335) do
+ActiveRecord::Schema.define(version: 20150803234819) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,8 +21,8 @@ ActiveRecord::Schema.define(version: 20150724002335) do
     t.string   "make"
     t.string   "model"
     t.string   "diameter"
-    t.string   "front_width_offset"
-    t.string   "rear_width_offset"
+    t.string   "front_width"
+    t.string   "rear_width"
     t.string   "pcd_lug_pattern"
     t.string   "price"
     t.text     "notes"
@@ -32,6 +32,8 @@ ActiveRecord::Schema.define(version: 20150724002335) do
     t.string   "image_content_type"
     t.integer  "image_file_size"
     t.datetime "image_updated_at"
+    t.string   "front_offset"
+    t.string   "rear_offset"
   end
 
 end
