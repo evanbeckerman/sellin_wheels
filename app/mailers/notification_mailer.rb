@@ -1,5 +1,5 @@
 class NotificationMailer < ActionMailer::Base
-  default from: "Sellin Wheels"
+  default from: "SellinWheels"
   layout 'mailer'
 
   def notification(wheel)
