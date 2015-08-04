@@ -9,14 +9,16 @@
       .panel-body
         %div.row
           %div.col.xs-12.text-center
-            = image_tag @wheel.image.url(:square, timestamp:false) 
+            = image_tag @wheel.image.url(:medium, timestamp:false) 
         %div.row
           %div.col-xs-12
+            %p
+              &nbsp
             FOR SALE BY:
             %br
             ="@#{@wheel.instagram_username}"
             %br
-            🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹
+            🔹🔹🔹 
             %br
             MAKE: ##{@wheel.make}
             %br
@@ -34,13 +36,13 @@
             %br
             PCD / LUG PATTERN: #{@wheel.pcd_lug_pattern}
             %br
-            🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹
+            🔹🔹🔹 
             %br
             PRICE: $ #{@wheel.price}
             %br
             NOTES/COMMENTS: #{@wheel.notes}
             %br
-            🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹
+            🔹🔹🔹 
             %br
             = "#sellinwheels"
             %br

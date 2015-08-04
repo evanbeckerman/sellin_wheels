@@ -3,7 +3,7 @@ class Wheel < ActiveRecord::Base
   has_attached_file :image, styles: {
     thumb: '100x100>',
     square: '200x200#',
-    medium: '300x300>'
+    medium: '640x640>'
   }
 
   # Validate the attached image is image/jpg, image/png, etc
