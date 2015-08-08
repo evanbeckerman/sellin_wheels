@@ -19,6 +19,7 @@ class WheelsController < ApplicationController
   end
 
   def index
+    @wheels = Wheel.all
   end
 
   private

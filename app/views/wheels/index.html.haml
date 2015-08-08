@@ -1,0 +1,16 @@
+%div.container
+  %h1 Current Listings
+  - @wheels.in_groups_of(4, false).each do |wheel_group|
+    .row
+      -wheel_group.each do |wheel|
+        .col-xs-3
+          .thumbnail
+            - if wheel.image.present?
+              = image_tag wheel.image.url(:medium, timestamp:false), class: "img-responsive" 
+            - else
+              No Image
+            .caption
+              %b #{wheel.make} | #{wheel.model}
+              %p Submitted by @#{wheel.instagram_username}
+              %p
+                = link_to "View Post", wheel_path(wheel), class: "btn btn-primary"
