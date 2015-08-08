@@ -3,7 +3,7 @@
   - @wheels.in_groups_of(4, false).each do |wheel_group|
     .row
       -wheel_group.each do |wheel|
-        .col-xs-3
+        .col-lg-3
           .thumbnail
             - if wheel.image.present?
               = image_tag wheel.image.url(:medium, timestamp:false), class: "img-responsive" 
