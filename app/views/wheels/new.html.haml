@@ -10,7 +10,7 @@
     %div.col.xs-3.text-center
       = form_for(@wheel, multipart: true, :html => {:class => "form-horizontal"}) do |f|
         %div.form-group
-          = f.label :instagram_username, class: "col-xs-3 control-label"
+          = f.label "Instagram Username", class: "col-xs-3 control-label"
           %div.col-xs-6
             = f.text_field :instagram_username, class: 'form-control'
         %div.form-group
@@ -54,11 +54,16 @@
           %div.col-xs-6
             = f.text_area :notes, class: 'form-control'
         %div.form-group
-          = f.label :image, class: "col-xs-3 control-label"
+          = f.label "image", class: "col-xs-3 control-label"
           %div.col-xs-6
             %p
               = f.file_field :image
         %div.form-group
-          %div.col-xs-3.col-xs-offset-3    
+          %div.col-xs-6.col-xs-offset-3    
             .actions
-              = f.submit 'Submit', class: "btn"
+              %script{:src => "https://checkout.stripe.com/checkout.js"}
+              %script.stripe-button{"data-amount" => "200", "data-description" => "1 Ad", "data-label" => "1 Ad ($2)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
+              %script.stripe-button{"data-amount" => "500", "data-description" => "3 Ads", "data-label" => "3 Ads ($5)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
+              %script.stripe-button{"data-amount" => "800", "data-description" => "5 Ads", "data-label" => "5 Ads ($8)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
+              %script.stripe-button{"data-amount" => "2000", "data-description" => "Post Until Sold", "data-label" => "Post Until Sold ($20)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
+

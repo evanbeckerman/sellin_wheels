@@ -1,5 +1,5 @@
 class Wheel < ActiveRecord::Base
-  validates :instagram_username, :image, :presence => true
+  # validates :instagram_username, :image, :presence => true
   has_attached_file :image, styles: {
     thumb: '100x100>',
     square: '200x200#',

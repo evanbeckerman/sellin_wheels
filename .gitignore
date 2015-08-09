@@ -17,3 +17,5 @@
 
 .ruby-version
 .rbenv-gemsets
+# Ignore application configuration
+/config/application.yml

@@ -11,6 +11,9 @@
               No Image
             .caption
               %b #{wheel.make} | #{wheel.model}
-              %p Submitted by @#{wheel.instagram_username}
+              %p  
+                Submitted by @#{wheel.instagram_username}
+                %br/
+                %small #{distance_of_time_in_words(wheel.created_at, DateTime.now)} ago
               %p
                 = link_to "View Post", wheel_path(wheel), class: "btn btn-primary"

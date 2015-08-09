@@ -17,5 +17,6 @@ gem 'rails_12factor', group: :production
 gem 'thin', group: :development
 gem 'sdoc', '~> 0.4.0',          group: :doc
 gem 'spring',        group: :development
+gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 
 ruby "2.1.3"
