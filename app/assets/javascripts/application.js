@@ -15,3 +15,19 @@
 //= require turbolinks
 //= require bootstrap-sprockets
 //= require_tree .
+
+// function showFoo() {
+//   var data = $('#coupon_code')[0].value;
+//     $.ajax({
+//     type: 'POST',
+//     url: '/coupons/check_code',
+//     data: {'coupon_code': data },
+//     complete: function(){
+//       // alert("derp");
+//     },
+//     async:false
+//   });
+//   return false;
+//   $('html, body').stop();
+// }
+

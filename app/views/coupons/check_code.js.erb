@@ -1,0 +1,6 @@
+<% if @free_submission %>
+  $('#form').show();
+  $('#not-free-payment').remove();
+<% else %>
+  alert("Invalid Code");
+<% end %>

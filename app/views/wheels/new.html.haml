@@ -6,64 +6,76 @@
   %div.row
     %div.col-xs-12.text-center
       = image_tag("logo.jpg")
-  %div.row
-    %div.col.xs-3.text-center
-      = form_for(@wheel, multipart: true, :html => {:class => "form-horizontal"}) do |f|
+  - unless @charged
+    %div.row#payment
+      %div.col-xs-6.col-xs-offset-3
         %div.form-group
-          = f.label "Instagram Username", class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :instagram_username, class: 'form-control'
-        %div.form-group
-          = f.label :make, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :make, class: 'form-control'
-        %div.form-group
-          = f.label :model, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :model, class: 'form-control'
-        %div.form-group
-          = f.label :diameter, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :diameter, class: 'form-control'
-        %div.form-group
-          = f.label :front_width, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :front_width, class: 'form-control'
-        %div.form-group
-          = f.label :front_offset, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :front_offset, class: 'form-control'
-        %div.form-group
-          = f.label :rear_width, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :rear_width, class: 'form-control'
-        %div.form-group
-          = f.label :rear_offset, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :rear_offset, class: 'form-control'
-        %div.form-group
-          = f.label :pcd_lug_pattern, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :pcd_lug_pattern, class: 'form-control'
-        %div.form-group
-          = f.label :price, class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_field :price, class: 'form-control'
-        %div.form-group
-          = f.label "notes/hashtags", class: "col-xs-3 control-label"
-          %div.col-xs-6
-            = f.text_area :notes, class: 'form-control'
-        %div.form-group
-          = f.label "image", class: "col-xs-3 control-label"
-          %div.col-xs-6
-            %p
-              = f.file_field :image
-        %div.form-group
-          %div.col-xs-6.col-xs-offset-3    
-            .actions
-              %script{:src => "https://checkout.stripe.com/checkout.js"}
-              %script.stripe-button{"data-amount" => "200", "data-description" => "1 Ad", "data-label" => "1 Ad ($2)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
-              %script.stripe-button{"data-amount" => "500", "data-description" => "3 Ads", "data-label" => "3 Ads ($5)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
-              %script.stripe-button{"data-amount" => "800", "data-description" => "5 Ads", "data-label" => "5 Ads ($8)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
-              %script.stripe-button{"data-amount" => "2000", "data-description" => "Post Until Sold", "data-label" => "Post Until Sold ($20)", "data-key" => ENV["STRIPE_PUBLISHABLE_KEY"], "data-name" => "Sellin Wheels", :src => "https://checkout.stripe.com/checkout.js"}
+          = form_tag("/coupons/check_code") do
+            = label_tag "Coupon Code", nil, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = text_field_tag :coupon_code, nil,  class: "form-control"
+            %div.col-xs-3
+              = submit_tag "Apply", class: "btn btn-default"
+  - unless @charged
+    %div.row#not-free-payment
+      %div.col.col-xs-12.text-center
+        = render "free_submission"
+  - if @charged
+    %div.row#form
+      %div.row
+        %div.col-xs-12.text-center
+          %h5 Please fill out as much as you can
+      %div.col.xs-3.text-center
+        = form_for(@wheel, multipart: true, :html => {:class => "form-horizontal"}) do |f|
+          %div.form-group
+            = f.label "Instagram Username", class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :instagram_username, class: 'form-control'
+          %div.form-group
+            = f.label :make, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :make, class: 'form-control'
+          %div.form-group
+            = f.label :model, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :model, class: 'form-control'
+          %div.form-group
+            = f.label :diameter, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :diameter, class: 'form-control'
+          %div.form-group
+            = f.label :front_width, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :front_width, class: 'form-control'
+          %div.form-group
+            = f.label :front_offset, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :front_offset, class: 'form-control'
+          %div.form-group
+            = f.label :rear_width, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :rear_width, class: 'form-control'
+          %div.form-group
+            = f.label :rear_offset, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :rear_offset, class: 'form-control'
+          %div.form-group
+            = f.label :pcd_lug_pattern, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :pcd_lug_pattern, class: 'form-control'
+          %div.form-group
+            = f.label :price, class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_field :price, class: 'form-control'
+          %div.form-group
+            = f.label "notes/hashtags", class: "col-xs-3 control-label"
+            %div.col-xs-6
+              = f.text_area :notes, class: 'form-control'
+          %div.form-group
+            = f.label "image", class: "col-xs-3 control-label"
+            %div.col-xs-6
+              %p
+                = f.file_field :image
+          %div.form-group
+            = submit_tag "Submit!"
 

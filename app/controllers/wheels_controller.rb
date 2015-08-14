@@ -2,6 +2,13 @@ class WheelsController < ApplicationController
 
   def new
     @wheel = Wheel.new
+    @charged = false
+    if params[:c_id].present?
+      if Charge.where(charge_password: params[:c_id]).present?
+        @charged = true
+        @charge = Charge.find_by_c_id(params[:c_id])
+      end
+    end
   end
 
   def create
@@ -10,7 +17,7 @@ class WheelsController < ApplicationController
       charge = charge_em
       if charge == true
         NotificationMailer.notification(@wheel).deliver if Rails.env == "production"
-        redirect_to new_wheel_path, notice: "Thank you for your submission!"
+        redirect_to wheel_path(@wheel), notice: "Thank you for your submission!"
       else
         render action: 'new'
       end
