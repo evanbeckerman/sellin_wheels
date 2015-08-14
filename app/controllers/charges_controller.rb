@@ -7,8 +7,16 @@ class ChargesController < ApplicationController
   def create
     begin
     # Amount in cents
-      @amount = 500
       @purchase = params[:number_of_ads]
+      if @purchase == "1 ($3)"
+        @amount = 300
+      elsif @purchase == "3 ($7)"
+        @amount = 700
+      elsif @purchase == "5 ($10)"
+        @amount = 1000
+      else
+        @amount = 3000
+      end
 
       customer = Stripe::Customer.create(
         :email => 'example@stripe.com',
@@ -24,12 +32,15 @@ class ChargesController < ApplicationController
 
     rescue Stripe::CardError => e
       flash[:error] = e.message
-      p "derp"
-      redirect_to charges_path 
+      @error = e.message
     end
-    @password = SecureRandom.base64
-    Charge.create(email: params[:stripeEmail], amount: @amount, charge_password: @password, stripe_customer_id: customer.id, string: @purchase)
-    redirect_to new_wheel_path(c_id: @password)
+    if @error.present?
+      redirect_to new_wheel_path, alert: "Credit Card Error, try again. #{e.message}"
+    else
+      @password = SecureRandom.base64
+      Charge.create(email: params[:stripeEmail], amount: @amount, charge_password: @password, stripe_customer_id: customer.id, string: @purchase)
+      redirect_to new_wheel_path(c_id: @password), notice: "Thank you for your purchase of #{@purchase}"
+    end
   end
 
 end
