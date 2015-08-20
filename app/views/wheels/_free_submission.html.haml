@@ -1,10 +1,10 @@
 = form_tag charges_path do
   %div#payment-options
     %div.form-group
-      %div.col-xs-6.col-xs-offset-3
-        = label_tag "Select Number of Ads", nil, class: "col-xs-3 control-label"
+      = label_tag "Select Number of Ads", nil, class: "col-md-3 control-label"
+      %div.col-lg-9
         = select_tag :number_of_ads, options_for_select(["1 ($3)", "3 ($7)", "5 ($10)", "* Offer in 30 days or less or full refund ($30)"])
     %div.row
-      %div.col-xs-6.col-xs-offset-3    
+      %div.col-xs-6.col-xs-offset-3
         .actions
           %script.stripe-button{ src: "https://checkout.stripe.com/checkout.js", data: {description: "Purchase", label: "Purchase", key: ENV["STRIPE_PUBLISHABLE_KEY"], name: "Sellin Wheels"}}

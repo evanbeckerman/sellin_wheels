@@ -8,7 +8,7 @@
       = image_tag("logo.jpg")
   - unless @charged
     %div.row#payment
-      %div.col-xs-6.col-xs-offset-3
+      %div.col-lg-12
         %div.form-group
           = form_tag("/coupons/check_code") do
             = label_tag "Coupon Code", nil, class: "col-xs-3 control-label"
@@ -18,7 +18,7 @@
               = submit_tag "Apply", class: "btn btn-default"
   - unless @charged
     %div.row#not-free-payment
-      %div.col.col-xs-12.text-center
+      %div.col-xs-12
         = render "free_submission"
   - if @charged
     %div.row#form
