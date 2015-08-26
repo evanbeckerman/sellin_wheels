@@ -13,14 +13,15 @@ class WheelsController < ApplicationController
 
   def create
     @wheel = Wheel.new(wheel_params)
+    if params[:charge_id].present?
+      @wheel.charge_id = params[:charge_id].to_i
+    end
+    if params[:user_id].present?
+      @wheel.user_id = params[:user_id].to_i
+    end
     if @wheel.save
-      charge = charge_em
-      if charge == true
-        NotificationMailer.notification(@wheel).deliver if Rails.env == "production"
-        redirect_to wheel_path(@wheel), notice: "Thank you for your submission!"
-      else
-        render action: 'new'
-      end
+      NotificationMailer.notification(@wheel).deliver if Rails.env == "production"
+      redirect_to wheel_path(@wheel), notice: "Thank you for your submission!"
     else
       render action: 'new'
     end
@@ -31,7 +32,7 @@ class WheelsController < ApplicationController
   end
 
   def index
-    @wheels = Wheel.all.sort_by(&:created_at).reverse
+    @wheels = Wheel.order(created_at: :desc).page params[:page]
   end
 
   private

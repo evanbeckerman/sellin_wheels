@@ -1,0 +1,65 @@
+#carousel-example-generic.carousel.slide{"data-ride" => "carousel"}
+  / Indicators
+  %ol.carousel-indicators
+    %li.active{"data-slide-to" => "0", "data-target" => "#carousel-example-generic"}
+    %li{"data-slide-to" => "1", "data-target" => "#carousel-example-generic"}
+    %li{"data-slide-to" => "2", "data-target" => "#carousel-example-generic"}
+  / Wrapper for slides
+  .carousel-inner{:role => "listbox"}
+    .item.active
+      = image_tag("tryagain.jpg", class: "img-responsive")
+    .item
+      = image_tag("hrebanner2.jpg", class: "img-responsive")
+    .item
+      = image_tag("banner3.jpg", class: "img-responsive")
+    .item
+      = image_tag("banner4.jpg", class: "img-responsive")
+    .item
+      = image_tag("banner5.jpg", class: "img-responsive")
+  / Controls
+  %a.left.carousel-control{"data-slide" => "prev", :href => "#carousel-example-generic", :role => "button"}
+    %span.glyphicon.glyphicon-chevron-left{"aria-hidden" => "true"}
+    %span.sr-only Previous
+  %a.right.carousel-control{"data-slide" => "next", :href => "#carousel-example-generic", :role => "button"}
+    %span.glyphicon.glyphicon-chevron-right{"aria-hidden" => "true"}
+    %span.sr-only Next
+%div.container
+  %div.row
+    %div.col-xs-12.text-center
+      %h1 How it works
+      %p
+        Your first advertisement on @sellinwheels is completely FREE
+      %p What do you get?
+      %p
+        One instagram post on the @sellinwheels account during peak traffic!
+        %br 
+        One wheel advertisement on the www.sellinwheels.com listings page!
+
+  %div.row
+    %div.col-lg-4.text-center
+      .thumbnail
+        = image_tag("3.jpg")
+        .caption
+          %h3 $5
+          %p 
+            Three Instagram posts on the @sellinwheels account
+          %p
+            = link_to "Purchase", new_wheel_path(amount: 3), class: "btn btn-primary"
+    %div.col-lg-4.text-center
+      .thumbnail
+        = image_tag("5.jpg")
+        .caption
+          %h3 $10
+          %p 
+            Five Instagram posts on the @sellinwheels account
+          %p
+            = link_to "Purchase", new_wheel_path(amount: 5), class: "btn btn-primary"
+    %div.col-lg-4.text-center
+      .thumbnail
+        = image_tag("Infinity.jpg")
+        .caption
+          %h3 $30
+          %p 
+            Unlimited Instagram posts on the @sellinwheels account
+          %p
+            = link_to "Purchase", new_wheel_path(amount: "unlimited"), class: "btn btn-primary"

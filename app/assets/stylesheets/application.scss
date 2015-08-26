@@ -1,2 +1,24 @@
+$brand-primary: rgb(39,205,165);
+$text-color: rgb(90,90,90);
+$headings-color: rgb(39,205,165);
+$thumbnail-border: white;
+
 @import "bootstrap-sprockets";
 @import "bootstrap";
+
+#carousel-example-generic{
+  margin-top: -20px;
+}
+
+#carousel-example-generic img{
+  width: auto;
+  height: auto;
+
+}
+
+
+#carousel-example-generic,
+#carousel-example-generic .item,
+#carousel-example-generic .item img {
+  width: 100%;
+}

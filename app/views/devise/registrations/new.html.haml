@@ -1,0 +1,22 @@
+%div.container
+  %div.row
+    %div.col-xs-8
+      %h2 Sign up
+      = form_for(resource, as: resource_name, url: registration_path(resource_name), class: "form-horizontal") do |f|
+        = devise_error_messages!
+        .form-group
+          %label.col-sm-2.control-label{:for => "inputEmail3"} Email
+          .col-sm-10
+            = f.email_field :email, autofocus: true, class: "form-control"
+        .form-group
+          %label.col-sm-2.control-label{:for => "inputPassword3"} Password
+          .col-sm-10
+            = f.password_field :password, autocomplete: "off", class: "form-control"
+        .form-group
+          %label.col-sm-2.control-label{:for => "inputPasswordConfirmation"} Password Confirmation
+          .col-sm-10
+            = f.password_field :password_confirmation, autocomplete: "off", class: "form-control"
+        .form-group
+          .col-sm-6
+            .actions
+              = f.submit "Sign up", class: "btn btn-primary"

@@ -18,5 +18,8 @@ gem 'thin', group: :development
 gem 'sdoc', '~> 0.4.0',          group: :doc
 gem 'spring',        group: :development
 gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
+gem 'kaminari'
+gem 'bootstrap-kaminari-views'
+gem 'devise'
 
 ruby "2.1.3"

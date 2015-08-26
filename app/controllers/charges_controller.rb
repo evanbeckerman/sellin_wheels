@@ -8,11 +8,11 @@ class ChargesController < ApplicationController
     begin
     # Amount in cents
       @purchase = params[:number_of_ads]
-      if @purchase == "1 ($3)"
-        @amount = 300
-      elsif @purchase == "3 ($7)"
-        @amount = 700
-      elsif @purchase == "5 ($10)"
+      if @purchase == "3 for $5"
+        @amount = 500
+      elsif @purchase == "5 $10"
+        @amount = 1000
+      elsif @purchase == "10 ($10)"
         @amount = 1000
       else
         @amount = 3000
@@ -34,6 +34,7 @@ class ChargesController < ApplicationController
       flash[:error] = e.message
       @error = e.message
     end
+    
     if @error.present?
       redirect_to new_wheel_path, alert: "Credit Card Error, try again. #{e.message}"
     else

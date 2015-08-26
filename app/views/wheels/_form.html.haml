@@ -1,0 +1,56 @@
+= form_for(@wheel, multipart: true, :html => {:class => "form-horizontal"}) do |f|
+  - if current_user.present?
+    = hidden_field_tag :user_id, current_user.id
+  - if @charged
+    = hidden_field_tag :charge_id, @charge.id
+  %div.form-group
+    = f.label "Instagram Username", class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :instagram_username, class: 'form-control'
+  %div.form-group
+    = f.label :make, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :make, class: 'form-control'
+  %div.form-group
+    = f.label :model, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :model, class: 'form-control'
+  %div.form-group
+    = f.label :diameter, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :diameter, class: 'form-control'
+  %div.form-group
+    = f.label :front_width, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :front_width, class: 'form-control'
+  %div.form-group
+    = f.label :front_offset, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :front_offset, class: 'form-control'
+  %div.form-group
+    = f.label :rear_width, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :rear_width, class: 'form-control'
+  %div.form-group
+    = f.label :rear_offset, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :rear_offset, class: 'form-control'
+  %div.form-group
+    = f.label :pcd_lug_pattern, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :pcd_lug_pattern, class: 'form-control'
+  %div.form-group
+    = f.label :price, class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_field :price, class: 'form-control'
+  %div.form-group
+    = f.label "notes/hashtags", class: "col-xs-3 control-label"
+    %div.col-xs-6
+      = f.text_area :notes, class: 'form-control'
+  %div.form-group
+    = f.label "image", class: "col-xs-3 control-label"
+    %div.col-xs-6
+      %p
+        = f.file_field :image
+  %div.form-group
+    = submit_tag "Submit!", class: "btn btn-primary"

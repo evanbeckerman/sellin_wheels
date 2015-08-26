@@ -8,5 +8,7 @@ class Wheel < ActiveRecord::Base
 
   # Validate the attached image is image/jpg, image/png, etc
   validates_attachment_content_type :image, :content_type => /\Aimage\/.*\Z/
+  belongs_to :user
+  paginates_per 10
 
 end

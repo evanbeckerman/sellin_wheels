@@ -17,3 +17,4 @@
                 %small #{distance_of_time_in_words(wheel.created_at, DateTime.now)} ago
               %p
                 = link_to "View Post", wheel_path(wheel), class: "btn btn-primary"
+  = paginate @wheels, :theme => 'twitter-bootstrap-3'

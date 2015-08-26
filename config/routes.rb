@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  root 'wheels#new'
+  devise_for :users
+  root 'pages#index'
   resources :wheels
 
   resources :coupons do
