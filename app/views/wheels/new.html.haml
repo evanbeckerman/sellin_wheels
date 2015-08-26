@@ -12,7 +12,7 @@
   /             = text_field_tag :coupon_code, nil,  class: "form-control"
   /           %div.col-xs-3
   /             = submit_tag "Apply", class: "btn btn-default"
-  - if @charged
+  - if @charged || params[:amount] == "1"
     %div.row#form
       %div.row
         %div.col-xs-12.text-center
@@ -28,9 +28,10 @@
         %div.col.xs-3.text-center
           = render "form"
     - else
-      = render "purchase_form"
+      - unless params[:amount] == "1"
+        = render "purchase_form"
   - else
-    - unless @charged
+    - unless @charged || params[:amount] == "1"
       = render "purchase_form"
 
 

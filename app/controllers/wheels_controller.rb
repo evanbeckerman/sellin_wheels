@@ -3,6 +3,16 @@ class WheelsController < ApplicationController
   def new
     @wheel = Wheel.new
     @charged = false
+    @selected = nil
+    if params[:amount].present?
+      if params[:amount] == "3"
+        @selected = "3 for $5"
+      elsif params[:amount] == "5"
+        @selected = "5 for $10"
+      elsif params[:amount] == "unlimited"
+        @selected = "Unlimited for $30"
+      end
+    end
     if params[:c_id].present?
       if Charge.where(charge_password: params[:c_id]).present?
         @charged = true
