@@ -32,12 +32,12 @@
   %div.row
     %div.col-lg-6.col-lg-offset-4
       %p{style: "align: left;"}
-        %ol
-          %li Select the quantity of advertisements you would like posted.
-          %li Register your email to receive results & feedback
-          %li Fill out the simple Instagram form
-          %li Your advertisement will be featured in 24 hours or less!
-          %li Limit 1 Ad per day.
+        %ul#main-list
+          %li 1. Select the quantity of advertisements you would like posted.
+          %li 2. Register your email to receive results & feedback
+          %li 3. Fill out the simple Instagram form
+          %li 4. Your advertisement will be featured in 24 hours or less!
+          %li (Limit 1 Ad per day.)
   %div.row
     %div.col-lg-3.text-center
       .thumbnail
@@ -45,7 +45,7 @@
         .caption
           %h3 FREE!
           %p 
-            One Free Instagram posts on the @sellinwheels account
+            One Free Instagram post on the @sellinwheels account
           %p
             = link_to "Purchase", new_wheel_path(amount: 1), class: "btn btn-primary"
     %div.col-lg-3.text-center
