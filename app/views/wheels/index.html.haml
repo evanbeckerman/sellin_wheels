@@ -1,12 +1,13 @@
 %div.container
   = search_form_for @q do |f|
     #{f.label :wheel_make}
-    #{f.select :make_cont, options_for_select(["HRE Wheels","Oz Racing Wheels","ADV1 Wheels","Morr Wheels","BBS Wheels","Work Wheels","Advan Wheels","Volk Wheels","Hayashi Racing","Vossen Wheels","Kinesis","Techart","CCW Wheels","Rotiform","BLK Wheels","Ronal Wheels","Wedsport","Iforged","Aristo Collection","360 Forged","Other"]), prompt: "Search Make"}
+    #{f.select :make_cont, options_for_select(["HRE Wheels","Oz Racing Wheels","ADV1 Wheels","Morr Wheels","BBS Wheels","Work Wheels","Advan Wheels","Volk/Rays","Hayashi Racing","Vossen Wheels","Kinesis","Techart","CCW Wheels","Rotiform","BLK Wheels","Ronal Wheels","Wedsport","Iforged","Aristo Collection","360 forged","Forgeline","SSR","DPE","AG Wheels","Strasse Forged","Other"].sort), prompt: "Search Make"}
     #{f.label :diameter}
     #{f.select :diameter_cont, options_for_select(['15"','16"','17"','18"','19"','20"','21"','other']), prompt: "Search Diameter"}
     #{f.label :pcd_lug_pattern}
     #{f.select :pcd_lug_pattern_cont, options_for_select(["4x100","4x114.3","5x100","5x112","5x114.3","5x120","5x130","other"]), prompt: "Search PCD Lug Pattern"}
     #{f.submit class: "btn btn-primary"}
+    #{link_to "Clear Search", wheels_path, class: "btn btn-danger" if params[:q].present?} 
   %h1 Current Listings
   - @wheels.in_groups_of(4, false).each do |wheel_group|
     .row
