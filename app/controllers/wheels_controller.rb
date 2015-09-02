@@ -42,7 +42,30 @@ class WheelsController < ApplicationController
   end
 
   def index
-    @wheels = Wheel.order(created_at: :desc).page params[:page]
+    @q = Wheel.ransack(params[:q])
+    @wheels = @q.result(distinct: true)
+    @admin = false
+    if current_user.present?
+      if current_user.roles.present?
+        @admin = true
+      end
+    end
+  end
+
+  def destroy
+    @wheel = Wheel.find(params[:id])
+    @wheel.destroy
+    redirect_to wheels_path, notice: "you deleted a wheel"
+  end
+
+  def edit
+    @wheel = Wheel.find(params[:id])
+  end
+
+  def update
+    @wheel = Wheel.find(params[:id])
+    @wheel.update_attributes(wheel_params)
+    redirect_to wheel_path(@wheel), notice: "nice update bro"
   end
 
   private

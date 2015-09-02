@@ -6,10 +6,13 @@
     %li{"data-slide-to" => "2", "data-target" => "#carousel-example-generic"}
     %li{"data-slide-to" => "3", "data-target" => "#carousel-example-generic"}
     %li{"data-slide-to" => "4", "data-target" => "#carousel-example-generic"}
+    %li{"data-slide-to" => "5", "data-target" => "#carousel-example-generic"}
   / Wrapper for slides
   .carousel-inner{:role => "listbox"}
     .item.active
       = image_tag("tryagain.jpg", class: "img-responsive")
+    .item
+      = image_tag("D-Chan copy.jpg", class: "img-responsive")
     .item
       = image_tag("hrebanner2.jpg", class: "img-responsive")
     .item
@@ -33,10 +36,10 @@
     %div.col-lg-6.col-lg-offset-4
       %p{style: "align: left;"}
         %ul#main-list
-          %li 1. Select the quantity of advertisements you would like posted.
+          %li 1. Select the quantity of listings you would like posted.
           %li 2. Register your email to receive results & feedback
           %li 3. Fill out the simple Instagram form
-          %li 4. Your advertisement will be featured in 24 hours or less!
+          %li 4. Your listing will be featured in 24 hours or less!
           %li (Limit 1 Ad per day.)
   %div.row
     %div.col-lg-3.text-center
@@ -47,7 +50,7 @@
           %p 
             One Free Instagram post on the @sellinwheels account
           %p
-            = link_to "Purchase", new_wheel_path(amount: 1), class: "btn btn-primary"
+            = link_to "Free!", new_wheel_path(amount: 1), class: "btn btn-primary"
     %div.col-lg-3.text-center
       .thumbnail
         = image_tag("3.jpg", class: "img-responsive")

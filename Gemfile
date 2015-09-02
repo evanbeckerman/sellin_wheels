@@ -21,5 +21,8 @@ gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 gem 'kaminari'
 gem 'bootstrap-kaminari-views'
 gem 'devise'
+gem 'ransack'
+gem 'cancan'
+gem 'rolify'
 
 ruby "2.1.3"
