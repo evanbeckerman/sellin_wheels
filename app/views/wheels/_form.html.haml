@@ -10,7 +10,7 @@
   %div.form-group
     = f.label :wheel_make, class: "col-xs-5 control-label"
     %div.col-xs-3
-      = f.select :make, options_for_select(["HRE Wheels","Oz Racing Wheels","ADV1 Wheels","Morr Wheels","BBS Wheels","Work Wheels","Advan Wheels","Volk/Rays","Hayashi Racing","Vossen Wheels","Kinesis","Techart","CCW Wheels","Rotiform","BLK Wheels","Ronal Wheels","Wedsport","Iforged","Aristo Collection","360 forged","Forgeline","SSR","DPE","AG Wheels","Strasse Forged","Other"].sort), prompt: "Choose Wheel", class: 'form-control', style: "width:auto !important;"
+      = f.select :make, options_for_select(["HRE Wheels","Oz Racing Wheels","ADV1 Wheels","Morr Wheels","BBS Wheels","Work Wheels","Advan Wheels","Volk/Rays","Hayashi Racing","Vossen Wheels","Kinesis","Techart","CCW Wheels","Rotiform","BLK Wheels","Ronal Wheels","Wedsport","Iforged","Aristo Collection","360 forged","Forgeline","SSR","DPE","AG Wheels","Strasse Forged","Other"].sort), {prompt: "Select Make"}, {required: 'true', autofocus: 'true', class: 'form-control'}
   %div.form-group
     = f.label :wheel_model, class: "col-xs-5 control-label"
     %div.col-xs-3
@@ -18,11 +18,11 @@
   %div.form-group
     = f.label :diameter, class: "col-xs-5 control-label"
     %div.col-xs-3
-      = f.select(:diameter, options_for_select(['15"','16"','17"','18"','19"','20"','21"','other']), prompt: "Choose Diameter", class: "form-control")
+      = f.select :diameter, options_for_select(['15"','16"','17"','18"','19"','20"','21"','other']), {prompt: "Choose Diameter"}, {class: "form-control"}
   %div.form-group
     = f.label :front_width, class: "col-xs-5 control-label"
     %div.col-xs-3
-      = f.select(:front_width, options_for_select(['5.5"','6.0"','6.5"','7.0"','7.5"','8.0"','8.5"','9.0"','9.5"','10.0"','10.5"','11.0"','11.5"','12.0"','other']), prompt: "Choose Front Width", class: "form-control")
+      = f.select :front_width, options_for_select(['5.5"','6.0"','6.5"','7.0"','7.5"','8.0"','8.5"','9.0"','9.5"','10.0"','10.5"','11.0"','11.5"','12.0"','other']), {prompt: "Choose Front Width"}, {class: "form-control"}
   %div.form-group
     = f.label :front_offset, class: "col-xs-5 control-label"
     %div.col-xs-3
@@ -30,7 +30,7 @@
   %div.form-group
     = f.label :rear_width, class: "col-xs-5 control-label"
     %div.col-xs-3
-      = f.select(:rear_width, options_for_select(['5.5"','6.0"','6.5"','7.0"','7.5"','8.0"','8.5"','9.0"','9.5"','10.0"','10.5"','11.0"','11.5"','12.0"','other']), prompt: "Choose Rear Width", class: "form-control")
+      = f.select :rear_width, options_for_select(['5.5"','6.0"','6.5"','7.0"','7.5"','8.0"','8.5"','9.0"','9.5"','10.0"','10.5"','11.0"','11.5"','12.0"','other']), {prompt: "Choose Rear Width"}, {class: "form-control"}
   %div.form-group
   %div.form-group
     = f.label :rear_offset, class: "col-xs-5 control-label"
@@ -39,7 +39,7 @@
   %div.form-group
     = f.label :pcd_lug_pattern, class: "col-xs-5 control-label"
     %div.col-xs-3
-      = f.select(:pcd_lug_pattern, options_for_select(["4x100","4x114.3","5x100","5x112","5x114.3","5x120","5x130","other"]), prompt: "PCD Lug Pattern", class: "form-control")
+      = f.select :pcd_lug_pattern, options_for_select(["4x100","4x114.3","5x100","5x112","5x114.3","5x120","5x130","other"]), {prompt: "PCD Lug Pattern"}, {class: "form-control"}
   %div.form-group
     = f.label :price, class: "col-xs-5 control-label"
     %div.col-xs-3
