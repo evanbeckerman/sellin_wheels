@@ -17,7 +17,7 @@
             - if wheel.image.present?
               = image_tag wheel.image.url(:medium, timestamp:false), class: "img-responsive" 
             - else
-              No Image
+              = image_tag("no-img-placeholder.png", class: "img-responsive")
             .caption
               %b #{wheel.make} | #{wheel.model}
               %p  
