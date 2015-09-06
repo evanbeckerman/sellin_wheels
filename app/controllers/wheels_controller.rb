@@ -43,7 +43,7 @@ class WheelsController < ApplicationController
 
   def index
     @q = Wheel.ransack(params[:q])
-    @wheels = @q.result(distinct: true)
+    @wheels = @q.result(distinct: true).order('created_at DESC')
     @admin = false
     if current_user.present?
       if current_user.roles.present?
