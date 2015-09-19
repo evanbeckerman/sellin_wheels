@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require bootstrap-sprockets
+//= require tracking
 //= require_tree .
 
 // function showFoo() {
