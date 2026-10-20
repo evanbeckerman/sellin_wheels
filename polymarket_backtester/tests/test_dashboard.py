@@ -76,3 +76,20 @@ def test_research_guide_has_no_prediction_game(dashboard):
     assert 'Practice game' not in at.radio[0].options
     assert any('Compare historical strategies' == button.label for button in at.button)
     assert any('None yet' == metric.value for metric in at.metric)
+
+
+def test_simple_lab_runs_and_bid_changes_require_a_new_test(dashboard):
+    at = dashboard.run()
+    at.radio[0].set_value('Development strategies').run()
+    assert len(at.slider) == 1
+    assert len(at.number_input) == 1
+    assert at.slider[0].label == 'Bid amount per trade ($)'
+    next(button for button in at.button if button.label == 'Test strategy').click().run()
+    assert not at.exception
+    assert any(metric.label == 'Win rate' and metric.value == '92.44%' for metric in at.metric)
+    assert any(metric.label == 'Modeled average per calendar day' for metric in at.metric)
+    at.slider[0].set_value(50).run()
+    assert any('Changing a setting does not silently rerun' in item.value for item in at.info)
+    next(button for button in at.button if button.label == 'Test strategy').click().run()
+    assert not at.exception
+    assert any(metric.label == 'Avg modeled result / $50 trade' for metric in at.metric)

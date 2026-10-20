@@ -32,10 +32,24 @@ Keep the terminal open while using the dashboard. Stop it with Ctrl+C. First lau
 - **Data quality:** See what was collected and what is missing.
 - **Market explorer:** Inspect real markets and the first-10-minute regression.
 - **Trend analysis:** Compare predictions with settlements.
-- **Development strategies:** Adjust thresholds using development data only. Strict mode requires historical asks/depth, which this dataset lacks; turn it off only to inspect the clearly labeled assumed-execution scenarios.
+- **Development strategies / Strategy Lab:** Choose entry minute, minimum Bitcoin dollar gap above/below the opening target, and bid amount. Optionally require the first-10-minute trend to agree. Click **Test strategy** to review wins, losses, win rate, modeled net results and daily scenarios using the first 20 days only. Compare tested rules in the session scoreboard and export the results.
 - **Frozen validation:** See why no optimized trading rule passed the prespecified screen.
 
 The baseline predicted the final direction correctly in **613 of 810 usable validation markets (75.68%)**. That does **not** demonstrate profitable trading. Missing historical reference prices and historical order-book data are disclosed. Do not trade on these results.
+
+### How the simplified Strategy Lab works
+
+The minimum gap is a dollar distance, not a slope: with a $50 gap, the rule chooses Up when Bitcoin is at least $50 above its opening target and Down when it is at least $50 below. Markets inside the gap or exactly at the target are skipped. The optional trend checkbox separately requires the minutes 1–10 regression to point in the same direction. Prices are selected from the actual corresponding Up/Down token, never inferred from the other side.
+
+The bid slider sets the total debit including modeled fees, from $10 to $1,000. After-cost scenarios assume 0.5 cents/share half-spread, 0.5 cents/share slippage and sufficient liquidity. Observations over 90 seconds old and unsupported fee data are excluded. These assumptions do not establish executable historical fills.
+
+The **daily income estimate** is the historical scenario net result divided by all 20 development calendar days, including zero-trade days. Best/worst days and daily CSV exports are available. This is not a future-income forecast. Missing observations and market changes limit its interpretation. Increasing the bid scales modeled returns without establishing that larger fills were available.
+
+The comparison scoreboard ranks rules with at least 60 trades first, then by win percentage, and includes sample size, a descriptive confidence bound and modeled ROI. Trying many settings can overfit the same development sample. The original 192-rule research report and frozen validation decision are preserved; this interactive lab does not rerun validation. Comparison history is session-only unless exported.
+
+## Download all collected CSV data
+
+`all-data-csv.zip` contains nine CSV tables: the eight original collected/research tables plus **bitcoin_reference_samples.csv**, which exports 145,939 actual finer-resolution samples from the retained historical chart responses. Source hashes are included. Missing observations are not filled. The ZIP includes a table guide. Interactive Strategy Lab session results have separate download buttons and do not overwrite the original research tables.
 
 ## Updating an existing installation without downloading the data again
 

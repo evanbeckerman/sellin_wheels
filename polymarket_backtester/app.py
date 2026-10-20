@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from pm_btc.collector import verify_artifacts
-from pm_btc.research import Costs, Rule, metrics, minute_features, scenario_trades
+from pm_btc.research import Costs, Rule, metrics, minute_features, scenario_trades, wilson
 
 ROOT = Path(__file__).resolve().parent
 
@@ -27,6 +27,154 @@ def cached_csv(path, modified_ns, text_columns=True):
 def load_csv(directory, filename, text_columns=True):
     path = directory / filename
     return cached_csv(str(path), path.stat().st_mtime_ns, text_columns)
+
+
+def development_rows(features, start_date):
+    """This exploratory search never receives held-out outcomes or later dates."""
+    start = pd.Timestamp(start_date)
+    cutoff = (start + pd.Timedelta(days=20)).strftime("%Y-%m-%d")
+    return features[(features.split == "development") & (features.local_day >= str(start.date()))
+                    & (features.local_day < cutoff)].copy()
+
+
+def distance_rule_trades(features, targets, start_date, entry_minute, minimum_gap, costs=Costs(), require_trend=False):
+    """Follow the side of the opening target, with a dollar gap and no hidden trend filters."""
+    if entry_minute not in (10, 11, 12, 13) or not np.isfinite(minimum_gap) or minimum_gap < 0:
+        raise ValueError("Choose entry minute 10–13 and a nonnegative dollar gap")
+    f = development_rows(features, start_date)
+    f = f[(f.entry_minute == entry_minute) & (f.distance_usd.abs() >= minimum_gap) & (f.distance_usd != 0)].copy()
+    trend_direction = f.predicted_outcome.copy()
+    f["predicted_outcome"] = np.where(f.distance_usd > 0, "Up", "Down")
+    if require_trend:
+        f = f[f.predicted_outcome == trend_direction].copy()
+    eligible = len(f)
+    f["prediction_correct"] = f.predicted_outcome == f.winning_outcome
+    q = targets[["slug", "minute", "outcome", "last_observation_price", "last_observation_age_seconds",
+                 "last_observation_ts", "historical_ask", "historical_depth_usd"]].copy()
+    q["minute"] = pd.to_numeric(q.minute)
+    if q.duplicated(["slug", "minute", "outcome"]).any():
+        raise ValueError("Duplicate entry-time price records")
+    f = f.drop(columns=["observed_contract_price", "observation_age_seconds", "observation_ts",
+                        "historical_ask", "historical_depth_usd"], errors="ignore")
+    f = f.merge(q, left_on=["slug", "entry_minute", "predicted_outcome"],
+                right_on=["slug", "minute", "outcome"], how="left", validate="one_to_one")
+    for source, target in [("last_observation_price", "observed_contract_price"),
+                           ("last_observation_age_seconds", "observation_age_seconds"),
+                           ("last_observation_ts", "observation_ts"), ("historical_ask", "historical_ask"),
+                           ("historical_depth_usd", "historical_depth_usd")]:
+        f[target] = pd.to_numeric(f[source], errors="coerce")
+    # Existing scenario engine handles fees, stale observations and a $100 total debit.
+    # Momentum, volatility, slope and contract-price thresholds are disabled for this two-input rule.
+    rule = Rule(entry_minute, 0, 0, -float("inf"), float("inf"), 0.0, 1.0)
+    return scenario_trades(f, rule, costs), eligible
+
+
+def daily_rule_results(trades, start_date):
+    days = pd.date_range(start_date, periods=20, freq="D").strftime("%Y-%m-%d")
+    if trades.empty:
+        return pd.DataFrame({"Date": days, "Trades": 0, "Modeled net result ($)": 0.0})
+    grouped = trades.groupby("local_day").agg(**{"Trades": ("net_profit", "size"), "Modeled net result ($)": ("net_profit", "sum")})
+    grouped = grouped.reindex(days, fill_value=0)
+    grouped.index.name = "Date"
+    return grouped.reset_index()
+
+
+def open_lab_chart(slug, day):
+    st.session_state.charts_date = day
+    st.session_state.charts_interval = slug
+    st.session_state.dashboard_view = "Charts"
+
+
+def show_simple_lab(directory, audit):
+    st.subheader("Strategy Lab · build a rule, test history, review the score")
+    st.write("**Above target → Up. Below target → Down. Inside your minimum gap → skip.** The gap is Bitcoin's dollar distance from its opening target, not the contract's bid/ask spread.")
+    path = directory / "features.csv"
+    if not path.exists():
+        st.info("Validated historical features are needed before testing this rule.")
+        return
+    a, b, c = st.columns(3)
+    entry = a.selectbox("Entry minute", [10, 11, 12, 13], key="lab_entry")
+    gap = b.number_input("Minimum gap from opening target ($)", min_value=0.0, value=50.0, step=10.0, key="lab_gap")
+    bid = c.slider("Bid amount per trade ($)", min_value=10, max_value=1000, value=100, step=10, key="lab_bid")
+    require_trend = st.checkbox("Require the first-10-minute trend to agree", value=False)
+    st.caption(f"Example: with a ${gap:,.0f} gap, enter Up at least ${gap:,.0f} above the target or Down at least ${gap:,.0f} below it. Equality to the target is skipped. Only the first 20 days are tested.")
+    settings = (str(directory), entry, gap, bid, require_trend)
+    if st.button("Test strategy", type="primary"):
+        with st.spinner("Reviewing the actual development markets…"):
+            features = load_csv(directory, "features.csv", text_columns=False)
+            targets = load_csv(directory, "contract_targets.csv", text_columns=False)
+            trades, matched = distance_rule_trades(features, targets, audit["start_date_inclusive"], entry, gap, Costs(budget=bid), require_trend)
+            base = development_rows(features, audit["start_date_inclusive"])
+            available = int(base[base.entry_minute == entry].slug.nunique())
+            result = metrics(trades)
+        st.session_state.lab_result = dict(settings=settings, trades=trades, matched=matched, available=available, metrics=result)
+        history = st.session_state.setdefault("lab_history", {})
+        history[settings] = {"Entry minute": entry, "Minimum gap ($)": gap, "Bid amount ($)": bid, "Trend agreement": require_trend,
+            "Trades": result["total_trades"], "Wins": result["winning_trades"], "Losses": result["losing_trades"],
+            "Win rate (%)": result["win_percentage"], "Avg modeled result/trade ($)": result.get("expected_value_per_trade"),
+            "Total modeled result ($)": result.get("total_net_profit"),
+            "Modeled avg/day ($)": result["total_net_profit"] / 20 if result["total_net_profit"] is not None else None,
+            "Modeled ROI (%)": result["roi"] * 100 if result["roi"] is not None else None,
+            "95% win-rate lower bound (%)": wilson(result["winning_trades"], result["total_trades"])[0] * 100 if result["total_trades"] else None,
+            "60+ trade sample": result["total_trades"] >= 60}
+    saved = st.session_state.get("lab_result")
+    if not saved or saved["settings"] != settings:
+        st.info("Choose your settings and click Test strategy. Changing a setting does not silently rerun or change the previous result.")
+    else:
+        trades, result = saved["trades"], saved["metrics"]
+        n = result["total_trades"]
+        st.progress(1.0, text="Rule chosen → development history tested → score ready")
+        st.write(f"**{saved['matched']:,} markets reached the gap** out of {saved['available']:,} with eligible data at this entry minute. **{saved['matched'] - n:,} matches were excluded** because usable prices, fee data or execution assumptions were insufficient.")
+        st.caption(f"The rule skipped {saved['available'] - saved['matched']:,} eligible markets. The requested development window contains 1,920 intervals; missing reference observations reduce the available sample to {saved['available']:,} at this entry time.")
+        if not n:
+            st.info("No testable trades matched. No win rate or profit result can be reported.")
+        else:
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Win rate", f"{result['win_percentage']:.2f}%")
+            c2.metric("Wins", result["winning_trades"])
+            c3.metric("Losses", result["losing_trades"])
+            c4.metric("Trades tested", n)
+            p1, p2, p3 = st.columns(3)
+            p1.metric(f"Avg modeled result / ${bid} trade", f"${result['expected_value_per_trade']:,.2f}")
+            p2.metric("Total modeled result", f"${result['total_net_profit']:,.2f}")
+            p3.metric("Largest modeled drawdown", f"${result['maximum_drawdown']:,.2f}")
+            lower, upper = wilson(result["winning_trades"], n)
+            st.caption(f"Descriptive 95% win-rate interval: {lower:.1%}–{upper:.1%}. It assumes independent trades and is not adjusted for trying multiple settings.")
+            if n < 60:
+                st.info("Small sample: fewer than 60 trades. A high percentage here may be chance.")
+            if result["win_percentage"] >= 80:
+                st.write("**80% development target reached.** This is an in-sample observation, not a validated future win rate.")
+            with st.expander("All test metrics"):
+                st.dataframe(pd.DataFrame([{"Metric": key, "Value": str(value)} for key, value in result.items()]), hide_index=True, width="stretch")
+            curve = trades[["start_utc", "net_profit"]].copy()
+            curve["Cumulative modeled result"] = curve.net_profit.cumsum()
+            st.plotly_chart(px.line(curve, x="start_utc", y="Cumulative modeled result"), width="stretch")
+            daily = daily_rule_results(trades, audit["start_date_inclusive"])
+            st.subheader("Daily income estimate · historical scenario")
+            d1, d2, d3 = st.columns(3)
+            d1.metric("Modeled average per calendar day", f"${daily['Modeled net result ($)'].mean():,.2f}")
+            d2.metric("Best modeled day", f"${daily['Modeled net result ($)'].max():,.2f}")
+            d3.metric("Worst modeled day", f"${daily['Modeled net result ($)'].min():,.2f}")
+            st.caption("Average = this test's modeled net result divided by all 20 development calendar days, including zero-trade days. This is a historical daily scenario, not a forecast or guarantee of future income. Missing data and changing market conditions limit the estimate.")
+            st.plotly_chart(px.bar(daily, x="Date", y="Modeled net result ($)"), width="stretch")
+            st.download_button("Download daily scenario results", daily.to_csv(index=False), "daily_strategy_scenario.csv")
+            with st.expander("Review the matching markets and exact rule details"):
+                st.write("Direction is selected by above/below target at entry. The trend agreement filter is " + ("ON: the minutes 1–10 regression must point the same way." if require_trend else "OFF: no slope filter is applied.") + " A zero gap includes either side but skips exact equality.")
+                st.dataframe(trades[["slug", "start_utc", "distance_usd", "predicted_outcome", "winning_outcome",
+                                     "observed_contract_price", "observation_age_seconds", "purchase_price", "net_profit"]], hide_index=True, width="stretch")
+                slug = st.selectbox("Historical interval to inspect", trades.slug.tolist())
+                match = trades[trades.slug == slug].iloc[0]
+                st.button("Open this result in Charts", on_click=open_lab_chart, args=(slug, match.local_day))
+                st.download_button("Download this test's trades", trades.to_csv(index=False), "distance_rule_development_trades.csv")
+    tried = [row for key, row in st.session_state.get("lab_history", {}).items() if key[0] == str(directory)]
+    if tried:
+        st.subheader("Compare the rules you have tested")
+        table = pd.DataFrame(tried).sort_values(["60+ trade sample", "Win rate (%)", "Trades"], ascending=False, na_position="last")
+        st.dataframe(table, hide_index=True, width="stretch")
+        st.caption("Rules with at least 60 trades rank first, then by win percentage. A 100% score from only a few trades is not stronger evidence. Modeled ROI allows comparisons across different bid amounts; dollar results alone scale with the stake.")
+        st.download_button("Download my rule comparison", table.to_csv(index=False), "my_development_rules.csv")
+    st.warning(f"All dollar results assume fills from real historical observations plus 0.5¢/share half-spread, 0.5¢/share slippage, archived fees, a ${bid} total debit including fees and sufficient liquidity. Quotes older than 90 seconds are excluded. Historical asks/depth are missing, so real-world profitability is unverified. Raising the bid scales this scenario; it does not establish that larger fills were available.")
+    st.caption("Tests and scores use development data only. The frozen validation result is unchanged. Trying more settings increases overfitting risk; selecting a new strategy requires new future validation. Your comparison list lasts only for this browser session unless downloaded.")
 
 
 def optional_price(value):
@@ -140,8 +288,8 @@ def show_welcome(audit, report):
         frozen = report["frozen_experiment"]
         m1, m2, m3 = st.columns(3)
         m1.metric("Markets downloaded", f"{audit['actual_markets_downloaded']:,}")
-        m2.metric("Strategy combinations compared", frozen["grid_size"])
-        m3.metric("Rule selected for validation", "Yes" if frozen["rule"] else "None yet")
+        m2.metric("Original strategy combinations compared", frozen["grid_size"])
+        m3.metric("Original rule selected for validation", "Yes" if frozen["rule"] else "None yet")
         st.progress(1.0 if report.get("validation") else 2 / 3,
                     text="Research stages: review data → compare rules → validate a qualified rule")
         if not frozen["rule"]:
@@ -375,56 +523,7 @@ def main():
         for limitation in audit["limitations"]:
             st.write("• " + limitation)
     elif page == "Development strategies":
-        st.subheader("Development data only")
-        st.warning("Execution scenario: historical observations are real; the fill, spread, slippage and available $100 liquidity are assumptions. These results do not verify executable profits.")
-        feature_path = directory / "features.csv"
-        if not feature_path.exists():
-            st.info("Development controls become available after analysis has produced validated features.")
-        else:
-            features = load_csv(directory, "features.csv", text_columns=False)
-            development = features[features.split == "development"]
-            a, b, c = st.columns(3)
-            entry = a.selectbox("Entry minute", [10, 11, 12, 13])
-            slope = a.number_input("Minimum trend slope (basis points/minute)", min_value=0.0, value=0.25, step=0.25)
-            distance = a.number_input("Minimum distance in trend direction (basis points)", min_value=0.0, value=0.0, step=1.0)
-            momentum = b.number_input("Minimum 3-minute momentum (basis points)", min_value=0.0, value=0.0, step=1.0)
-            volatility = b.number_input("Maximum volatility (basis points)", min_value=0.01, value=100.0, step=1.0)
-            minimum = b.slider("Minimum observed contract price", 0.01, 0.99, 0.50, 0.01)
-            maximum = c.slider("Maximum observed contract price", 0.01, 0.99, 0.95, 0.01)
-            half_spread = c.number_input("Assumed half-spread ($/share)", min_value=0.0, value=0.005, step=0.005, format="%.3f")
-            slippage = c.number_input("Assumed slippage ($/share)", min_value=0.0, value=0.005, step=0.005, format="%.3f")
-            strict = st.checkbox("Require observed historical ask and sufficient depth", value=True)
-            rule = Rule(entry, slope, distance, momentum, volatility, minimum, maximum)
-            trades = scenario_trades(development, rule, Costs(half_spread=half_spread, slippage=slippage), strict=strict)
-            if trades.empty:
-                st.info("No qualifying trades with these data requirements. Historical ask/depth evidence is currently unavailable.")
-            else:
-                result = metrics(trades)
-                st.dataframe(pd.DataFrame([{"Metric": k, "Value": str(v)} for k, v in result.items()]), hide_index=True, width="stretch")
-                curve = trades[["start_utc", "net_profit"]].copy()
-                curve["Cumulative scenario P&L"] = curve.net_profit.cumsum()
-                curve["Scenario drawdown"] = np.maximum.accumulate(np.r_[0.0, curve["Cumulative scenario P&L"]])[1:] - curve["Cumulative scenario P&L"]
-                st.plotly_chart(px.line(curve, x="start_utc", y=["Cumulative scenario P&L", "Scenario drawdown"]), width="stretch")
-                st.download_button("Download development scenario trades", trades.to_csv(index=False), "development_scenario_trades.csv")
-            ranking_path = directory / "training_strategies.csv"
-            if ranking_path.exists():
-                st.subheader("Historical strategy comparison · development data only")
-                ranking = load_csv(directory, "training_strategies.csv", text_columns=False)
-                st.caption("Compare the available evidence, not just the highest win rate. Rows are ranked by the fixed statistical screen, then modeled return. These are candidate rules, not proven winners.")
-                readable = ranking[["rule_id", "entry_minute", "total_trades", "win_percentage",
-                                    "average_contract_purchase_price", "total_net_profit",
-                                    "maximum_drawdown", "expected_value_per_trade", "qualifies"]].rename(columns={
-                    "rule_id": "Rule ID", "entry_minute": "Entry minute", "total_trades": "Trades reviewed",
-                    "win_percentage": "Correct direction (%)", "average_contract_purchase_price": "Avg purchase price ($)",
-                    "total_net_profit": "Modeled result ($)", "maximum_drawdown": "Largest modeled drawdown ($)",
-                    "expected_value_per_trade": "Avg modeled result/trade ($)", "qualifies": "Passed evidence screen"})
-                st.dataframe(readable, hide_index=True, width="stretch")
-                with st.expander("Inspect every rule threshold and detailed metric"):
-                    st.dataframe(ranking, hide_index=True, width="stretch")
-                comparison = ranking.groupby("entry_minute", as_index=False).agg(best_training_scenario_profit=("total_net_profit", "max"), qualifying_rules=("qualifies", "sum"))
-                st.dataframe(comparison, hide_index=True, width="stretch")
-                st.download_button("Download every training strategy", ranking_path.read_bytes(), "training_strategies.csv")
-        st.caption("Changing these controls affects development data only. It does not alter the frozen validation rule. Each trade uses a $100 total debit including the modeled fee; ROI is return on deployed trade capital, not a funded-account return.")
+        show_simple_lab(directory, audit)
     elif page == "Frozen validation":
         if report:
             st.write("The first 20 calendar days determine one fixed rule. The last 10 days are evaluated only after that rule is saved. A failed training screen leaves the optimized holdout unrun.")
