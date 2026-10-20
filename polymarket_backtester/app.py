@@ -8,14 +8,22 @@ import plotly.express as px
 import streamlit as st
 
 from pm_btc.collector import verify_artifacts
-from pm_btc.research import Costs, Rule, load_features, metrics, minute_features, scenario_trades
+from pm_btc.research import Costs, Rule, metrics, minute_features, scenario_trades
 
 ROOT = Path(__file__).resolve().parent
 
 
-def load_csv(directory, filename):
+@st.cache_data(show_spinner=False)
+def cached_csv(path, modified_ns, text_columns=True):
+    if not text_columns:
+        return pd.read_csv(path)
     # Token identifiers can exceed integer precision: retain exact strings.
-    return pd.read_csv(directory / filename, dtype=str, keep_default_na=False)
+    return pd.read_csv(path, dtype=str, keep_default_na=False)
+
+
+def load_csv(directory, filename, text_columns=True):
+    path = directory / filename
+    return cached_csv(str(path), path.stat().st_mtime_ns, text_columns)
 
 
 def main():
@@ -29,17 +37,26 @@ def main():
     selected = st.sidebar.selectbox("Collection window", datasets, format_func=lambda p: p.parent.name)
     directory = selected.parent
     audit = json.loads(selected.read_text())
+    report_path = directory / "research_report.json"
+    report = json.loads(report_path.read_text()) if report_path.exists() else None
     st.write(f"**{audit['start_date_inclusive']} through {audit['end_date_exclusive']} (exclusive)** · {audit['timezone']}")
     st.caption("Calendar-day boundaries use the selected timezone; all CSV timestamps are UTC.")
     if not audit["analysis_ready"]:
-        st.warning("Data collection is incomplete. No prediction accuracy or profitability results are available.")
+        st.warning("Some Bitcoin reference observations are missing. Available results use validated markets only; real-world profitability has not been demonstrated.")
     columns = st.columns(4)
     columns[0].metric("Actual markets downloaded", f"{audit['actual_markets_downloaded']:,}", help="Expected time slots do not count as downloaded markets.")
     columns[1].metric("Expected intervals", f"{audit['expected_intervals']:,}")
     columns[2].metric("BTC observations", f"{audit['reference_samples_available']:,} / {audit['reference_samples_required']:,}")
     columns[3].metric("Contract observations", f"{audit['contract_history_observations']:,}")
-    quality, explorer, research, strategies, validation = st.tabs(["Data quality", "Market explorer", "Trend analysis", "Development strategies", "Frozen validation"])
-    with quality:
+    if report:
+        result = report["baseline_first_10_minute_trend"]["validation"]
+        if result["accuracy"] is not None:
+            st.info(f"Available validation result: {result['accuracy']:.2%} direction accuracy — {result['correct']:,} correct out of {result['markets']:,} usable markets. This is prediction accuracy, not a profit claim.")
+    page = st.radio("View", ["Data quality", "Market explorer", "Trend analysis", "Development strategies", "Frozen validation"],
+                    index=2, horizontal=True, label_visibility="collapsed")
+    # Render only the selected page. st.tabs eagerly executed every page, including
+    # an expensive full integrity scan before any trend results could be sent.
+    if page == "Data quality":
         st.subheader("Source access")
         for name, result in audit["api_probes"].items():
             st.write(f"**{name}**: {result['status']}")
@@ -57,19 +74,22 @@ def main():
         ])
         st.dataframe(coverage, hide_index=True, width="stretch")
         st.caption("A historical contract-price observation or trade print does not establish that $100 could have been filled at that price.")
-        failures = verify_artifacts(directory)
-        if failures:
-            st.error("Saved artifact integrity check failed: " + "; ".join(failures))
-        else:
-            st.success("Saved CSV and cached response hashes match. This verifies file integrity, not market completeness.")
+        st.caption("Full integrity verification reads thousands of files and may take several minutes. It runs only when you request it.")
+        if st.button("Verify downloaded files"):
+            with st.spinner("Checking saved files. Other views do not require this check."):
+                failures = verify_artifacts(directory)
+            if failures:
+                st.error("Saved artifact integrity check failed: " + "; ".join(failures))
+            else:
+                st.success("Saved CSV and cached response hashes match. This verifies file integrity, not market completeness.")
         issues = load_csv(directory, "issues.csv")
         if not issues.empty:
             st.dataframe(issues, hide_index=True, width="stretch")
         st.subheader("CSV exports")
-        for filename in audit["files"]:
-            st.download_button(filename, (directory / filename).read_bytes(), file_name=filename, mime="text/csv", key=filename)
+        filename = st.selectbox("CSV to download", list(audit["files"]))
+        st.download_button("Download selected CSV", (directory / filename).read_bytes(), file_name=filename, mime="text/csv")
         st.download_button("Download completeness audit", selected.read_bytes(), file_name="audit.json", mime="application/json")
-    with explorer:
+    elif page == "Market explorer":
         markets = load_csv(directory, "markets.csv")
         found_only = st.checkbox("Show only downloaded markets", value=True)
         view = markets[markets.discovery_status == "found"] if found_only else markets
@@ -104,9 +124,7 @@ def main():
             st.dataframe(references, hide_index=True, width="stretch")
             quotes = load_csv(directory, "contract_targets.csv")
             st.dataframe(quotes[quotes.slug == slug], hide_index=True, width="stretch")
-    with research:
-        report_path = directory / "research_report.json"
-        report = json.loads(report_path.read_text()) if report_path.exists() else None
+    elif page == "Trend analysis":
         if report:
             st.subheader("Does the first 10 minutes predict settlement?")
             for split, result in report["baseline_first_10_minute_trend"].items():
@@ -121,14 +139,14 @@ def main():
             st.info("Run the analysis command after collection. Only actual markets with validated reference paths can enter research.")
         for limitation in audit["limitations"]:
             st.write("• " + limitation)
-    with strategies:
+    elif page == "Development strategies":
         st.subheader("Development data only")
         st.warning("Execution scenario: historical observations are real; the fill, spread, slippage and available $100 liquidity are assumptions. These results do not verify executable profits.")
         feature_path = directory / "features.csv"
         if not feature_path.exists():
             st.info("Development controls become available after analysis has produced validated features.")
         else:
-            features = pd.read_csv(feature_path)
+            features = load_csv(directory, "features.csv", text_columns=False)
             development = features[features.split == "development"]
             a, b, c = st.columns(3)
             entry = a.selectbox("Entry minute", [10, 11, 12, 13])
@@ -156,13 +174,13 @@ def main():
             ranking_path = directory / "training_strategies.csv"
             if ranking_path.exists():
                 st.write("Prespecified training search (ranked by the fixed selection screen, then scenario P&L)")
-                ranking = pd.read_csv(ranking_path)
+                ranking = load_csv(directory, "training_strategies.csv", text_columns=False)
                 st.dataframe(ranking.head(40), hide_index=True, width="stretch")
                 comparison = ranking.groupby("entry_minute", as_index=False).agg(best_training_scenario_profit=("total_net_profit", "max"), qualifying_rules=("qualifies", "sum"))
                 st.dataframe(comparison, hide_index=True, width="stretch")
                 st.download_button("Download every training strategy", ranking_path.read_bytes(), "training_strategies.csv")
         st.caption("Changing these controls affects development data only. It does not alter the frozen validation rule. Each trade uses a $100 total debit including the modeled fee; ROI is return on deployed trade capital, not a funded-account return.")
-    with validation:
+    elif page == "Frozen validation":
         if report:
             st.write("The first 20 calendar days determine one fixed rule. The last 10 days are evaluated only after that rule is saved. A failed training screen leaves the optimized holdout unrun.")
             st.json(report["frozen_experiment"])
